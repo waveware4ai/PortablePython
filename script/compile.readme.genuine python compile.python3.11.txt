@@ -1,0 +1,291 @@
+
+ubuntu install with ubuntu-22.04.5-desktop-amd64.iso
+
+
+kr.archive.ubuntu.com -> mirror.kakao.com
+sudo sed -i 's/kr.archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list
+
+
+sudo apt update 
+sudo apt install net-tools
+sudo apt install openssh-server -y
+
+sudo apt-get install cifs-utils
+sudo mkdir /mnt/test
+sudo mount -t cifs  -o user=administrator,,uid=0,gid=0,file_mode=0777,dir_mode=0777 //192.168.3.14/w$/\!VM/mount /mnt/test
+
+
+sudo apt-get install build-essential gdb lcov pkg-config               \
+      libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
+      libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev       \
+      lzma lzma-dev tk-dev uuid-dev zlib1g-dev libmpdec-dev patchelf environment-modules
+
+------------------------------------------------------------------------------- python original take0 (system dependency) for python-3.11.9
+
+export BLD_HOME=/home/waveware/genuine
+export WORKHOME=$BLD_HOME
+
+cd $WORKHOME
+export PYTHON_VERSION=3.11.9
+export PYTHON_DOWNLOAD=python-${PYTHON_VERSION}.tar.xz
+export PYTHON_SRC_HOME=$WORKHOME/python-${PYTHON_VERSION}.genuine
+export PYTHON_TGT_HOME=$WORKHOME/python-${PYTHON_VERSION}.genuine.out
+rm -rf $PYTHON_SRC_HOME
+rm -rf $PYTHON_TGT_HOME
+
+if ! [ -f ./$PYTHON_DOWNLOAD ]; then
+    echo [INF] download ... $PYTHON_DOWNLOAD
+    wget -O python-${PYTHON_VERSION}.tar.xz https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
+fi
+tar -xvf $PYTHON_DOWNLOAD
+mv Python-${PYTHON_VERSION} $PYTHON_SRC_HOME
+cd $PYTHON_SRC_HOME
+
+
+------------------------------------------------------------------------------- start of patch
+
+##### edit source, before compile 
+##### lib/site.py ::: .pth getsitepackages patch
+lib/site.py 
+382 line
+getsitepackages
+                sitepackages.append(path)
+                EXEC_HOME=os.path.dirname(sys.executable) #14mhz
+                sitepackages.append(os.path.join(EXEC_HOME, libdir, "site-packages")) #14mhz
+                sitepackages.append(EXEC_HOME) #14mhz
+
+#### module/getpath.py  ::: avoid Could not find platform independent libraries <prefix>
+591 line
+            #warn('Could not find platform independent libraries <prefix>')
+            pass
+
+    if not prefix:
+        prefix = abspath('')
+        #warn('Could not find platform independent libraries <prefix>')
+
+622 line
+                #warn('Could not find platform dependent libraries <exec_prefix>')
+                if not platstdlib_dir:            # 14mhz
+                    platstdlib_dir = exec_prefix  # 14mhz
+
+658 line -- debug only
+    if True : warn(f"getpath.py ::: home[{home}], prefix[{prefix}], PREFIX[{PREFIX}], executable[{executable}], exec_prefix[{exec_prefix}], build_prefix[{build_prefix}], executable_dir[{executable_dir}], base_prefix[{base_prefix}], base_exec_prefix[{base_exec_prefix}], base_executable[{base_executable}], library[{library}], stdlib_dir[{stdlib_dir}], platstdlib_dir[{platstdlib_dir}]")
+
+#### module/getpath.py  ::: default sys.path patch 
+676 line
+    else:
+        pythonpath.append(joinpath(executable_dir, "lib"))               # 14mhz
+        pythonpath.append(joinpath(executable_dir, "python311.zip"))     # 14mhz
+        pythonpath.append(joinpath(executable_dir, "pyd"))               # 14mhz
+        pythonpath.append(joinpath(executable_dir, "lib/site-packages")) # 14mhz
+        #pythonpath.append(joinpath(prefix, ZIP_LANDMARK))
+        pythonpath.append(joinpath(executable_dir, ZIP_LANDMARK))
+
+718 line  
+    # Then add stdlib_dir and platstdlib_dir
+    if not stdlib_dir and prefix:
+        #stdlib_dir = joinpath(prefix, STDLIB_SUBDIR)
+        stdlib_dir = joinpath(executable_dir, STDLIB_SUBDIR)
+    if not platstdlib_dir and exec_prefix:
+        #platstdlib_dir = joinpath(exec_prefix, PLATSTDLIB_LANDMARK)
+        platstdlib_dir = joinpath(executable_dir, PLATSTDLIB_LANDMARK)        
+        
+##### pip patch
+
+sysconfig.py
+25 line
+EXEC_HOME=os.path.dirname(sys.executable)
+
+30 line
+    'posix_prefix': {
+        #'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
+        #'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
+        #'purelib': '{base}/lib/python{py_version_short}/site-packages',
+        #'platlib': '{platbase}/{platlibdir}/python{py_version_short}/site-packages',
+        #'include': '{installed_base}/include/python{py_version_short}{abiflags}',
+        #'platinclude': '{installed_platbase}/include/python{py_version_short}{abiflags}',
+        #'scripts': '{base}/bin',
+        #'data': '{base}',
+        'stdlib': f'{EXEC_HOME}/lib',
+        'platstdlib': f'{EXEC_HOME}/lib',
+        'purelib': f'{EXEC_HOME}/lib/site-packages',
+        'platlib': f'{EXEC_HOME}/lib/site-packages',
+        'include': f'{EXEC_HOME}/include',
+        'platinclude': f'{EXEC_HOME}/include',
+        'scripts': f'{EXEC_HOME}/script',
+        'data': f'{EXEC_HOME}',
+
+151 line
+        'posix_user': {
+            #'stdlib': '{userbase}/{platlibdir}/python{py_version_short}',
+            #'platstdlib': '{userbase}/{platlibdir}/python{py_version_short}',
+            #'purelib': '{userbase}/lib/python{py_version_short}/site-packages',
+            #'platlib': '{userbase}/lib/python{py_version_short}/site-packages',
+            #'include': '{userbase}/include/python{py_version_short}',
+            #'scripts': '{userbase}/bin',
+            #'data': '{userbase}',
+            'stdlib': '{EXEC_HOME}/{platlibdir}',
+            'platstdlib': '{EXEC_HOME}/{platlibdir}',
+            'purelib': '{EXEC_HOME}/lib',
+            'platlib': '{EXEC_HOME}/lib',
+            'include': '{EXEC_HOME}/include',
+            'scripts': '{EXEC_HOME}/script',
+            'data': '{EXEC_HOME}',
+            },
+
+#####
+
+------------------------------------------------------------------------------- end of patch
+
+cd $PYTHON_SRC_HOME
+make clean
+make distclean
+
+unset CC
+unset CXX
+unset CFLAGS
+unset CPPFLAGS
+unset LDFLAGS
+./configure --enable-optimizations --with-lto --enable-ipv6      \
+            --without-ensurepip                                  \
+            --prefix=$PYTHON_TGT_HOME --bindir=$PYTHON_TGT_HOME 
+
+make -j8 LDFLAGS+=-s && make install
+cd $WORKHOME
+
+------------------------------------------------------------------------------- end of compile
+
+cd $PYTHON_TGT_HOME
+cp python3.11 python
+rm 2to3 2to3-3.11 idle3 idle3.11 pydoc3 pydoc3.11 python3 python3.11 python3.11-config python3-config
+
+mkdir libs
+mkdir lib.test
+
+mv -v lib/{libpython3.11.a,pkgconfig} ./libs
+mv -v lib/python3.11/{config-3.11-x86_64-linux-gnu,tkinter} ./libs
+mv lib/python3.11/lib-dynload ./pyd
+mv ./pyd/_test* ./lib.test
+mv lib/python3.11/test ./lib.test
+mv lib/python3.11/site-packages/ ./lib
+
+#####
+
+vi python311.pth
+./python311.zip
+.
+./lib
+./lib.test
+./pyd
+./lib/site-packages
+./lib/site-packages.pip.zip
+./library/bin
+
+# Uncomment to run site.main() automatically
+#import site
+
+
+#####
+
+./python -c "import os, sys;import _ssl;print(_ssl.__file__);"
+./python -c "import os, sys;import _bz2;print(_bz2.__file__);"
+./python -c "import os, sys;import _posixsubprocess;print(_posixsubprocess.__file__);"
+./python -c "import os, sys; print(sys.path);"
+
+------------------------------------------------------------------------------- test
+# test
+cd $PYTHON_TGT_HOME
+./python -m test --pgo --timeout=1200 || true
+
+waveware@VM:~/genuine/python-3.11.9.genuine.out$ ./python -m test --pgo --timeout=1200 || true
+-bash: ./python: No such file or directory
+waveware@VM:~/genuine/python-3.11.9.genuine.out$ ./python3.11 -m test --pgo --timeout=1200 || true
+Using random seed: 4234114674
+0:00:00 load avg: 0.05 Run 44 tests sequentially (timeout: 20 min)
+0:00:00 load avg: 0.05 [ 1/44] test_array
+0:00:00 load avg: 0.05 [ 2/44] test_base64
+0:00:00 load avg: 0.05 [ 3/44] test_binascii
+0:00:00 load avg: 0.05 [ 4/44] test_binop
+0:00:00 load avg: 0.05 [ 5/44] test_bisect
+0:00:00 load avg: 0.05 [ 6/44] test_bytes
+0:00:01 load avg: 0.05 [ 7/44] test_bz2
+0:00:01 load avg: 0.05 [ 8/44] test_cmath
+0:00:01 load avg: 0.05 [ 9/44] test_codecs
+0:00:01 load avg: 0.05 [10/44] test_collections
+0:00:02 load avg: 0.13 [11/44] test_complex
+0:00:02 load avg: 0.13 [12/44] test_dataclasses
+0:00:02 load avg: 0.13 [13/44] test_datetime
+0:00:04 load avg: 0.13 [14/44] test_decimal
+0:00:05 load avg: 0.13 [15/44] test_difflib
+0:00:05 load avg: 0.13 [16/44] test_embed
+0:00:05 load avg: 0.13 [17/44] test_float
+0:00:05 load avg: 0.13 [18/44] test_fstring
+0:00:06 load avg: 0.13 [19/44] test_functools
+0:00:06 load avg: 0.13 [20/44] test_generators
+0:00:06 load avg: 0.13 [21/44] test_hashlib
+0:00:06 load avg: 0.13 [22/44] test_heapq
+0:00:06 load avg: 0.13 [23/44] test_int
+0:00:06 load avg: 0.20 [24/44] test_itertools
+0:00:07 load avg: 0.20 [25/44] test_json
+0:00:08 load avg: 0.20 [26/44] test_long
+0:00:09 load avg: 0.20 [27/44] test_lzma
+0:00:09 load avg: 0.20 [28/44] test_math
+0:00:09 load avg: 0.20 [29/44] test_memoryview
+0:00:09 load avg: 0.20 [30/44] test_operator
+0:00:09 load avg: 0.20 [31/44] test_ordered_dict
+0:00:10 load avg: 0.20 [32/44] test_patma
+0:00:10 load avg: 0.20 [33/44] test_pickle
+0:00:11 load avg: 0.20 [34/44] test_pprint
+0:00:11 load avg: 0.20 [35/44] test_re
+0:00:11 load avg: 0.20 [36/44] test_set
+0:00:12 load avg: 0.26 [37/44] test_sqlite3
+0:00:12 load avg: 0.26 [38/44] test_statistics
+0:00:13 load avg: 0.26 [39/44] test_struct
+0:00:13 load avg: 0.26 [40/44] test_tabnanny
+0:00:13 load avg: 0.26 [41/44] test_time
+0:00:15 load avg: 0.26 [42/44] test_unicode
+0:00:16 load avg: 0.26 [43/44] test_xml_etree
+0:00:16 load avg: 0.26 [44/44] test_xml_etree_c
+
+Total duration: 16.5 sec
+Total tests: run=8,859 skipped=248
+Total test files: run=44/44
+Result: SUCCESS
+
+
+
+------------------------------------------------------------------------------- make a zip archive
+
+#export PYTHONPYCACHEPREFIX=$PWD/lib.compile
+unset PYTHONPYCACHEPREFIX
+./python -m compileall -b ./lib
+find ./lib -name "__pycache__" | xargs rm -rf "__pycache__"
+
+cd lib/python3.11
+zip -r $PYTHON_TGT_HOME/python311.zip *
+cd ..
+rm -rf python3.11
+cd $PYTHON_TGT_HOME
+
+zip -r python311.dev.zip include libs lib.test
+rm -rf include libs lib.test
+
+
+wget -O python.pip.py https://bootstrap.pypa.io/get-pip.py
+
+
+./python python.pip.py
+
+
+------------------------------------------------------------------------------- install another package
+
+./python -m pip install lit==15.0.7 -v 
+
+./python -m pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+import torch
+torch.cuda.is_available()
+torch.cuda.device_count()
+torch.cuda.current_device()
+torch.cuda.get_device_name(0)
+torch.rand(2,3).cuda()
+
