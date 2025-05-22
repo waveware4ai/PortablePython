@@ -18,4 +18,4 @@ https://www.python.org/downloads/windows/
 
 Compile How to
 ------------
-Perform compilation by referencing the script folder
+Perform compile by referencing the script folder
