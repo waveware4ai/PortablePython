@@ -285,13 +285,6 @@ wget -O python.pip.py https://bootstrap.pypa.io/get-pip.py
 
 ------------------------------------------------------------------------------- install another package
 
-./python -m pip install lit==15.0.7 -v 
-
-./python -m pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
-import torch
-torch.cuda.is_available()
-torch.cuda.device_count()
-torch.cuda.current_device()
-torch.cuda.get_device_name(0)
-torch.rand(2,3).cuda()
-
+.
+.
+.
