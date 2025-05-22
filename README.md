@@ -10,11 +10,11 @@ Installation
 Support
 ------------
 Currently, 
--PythonPortable Linux version only supports Ubuntu 22, and Python 3.9, 3.10, 3.11, and 3.12 versions were compiled for portable use.
--PythonPortable Windows version has made Python 3.10, 3.11, and 3.12 portable, and has modified it using the already publicly available Python Embedded.
--See the links below
--https://www.python.org/downloads/source/
--https://www.python.org/downloads/windows/
+PythonPortable Linux version only supports Ubuntu 22, and Python 3.9, 3.10, 3.11, and 3.12 versions were compiled for portable use.  
+PythonPortable Windows version has made Python 3.10, 3.11, and 3.12 portable, and has modified it using the already publicly available Python Embedded.  
+See the links below  
+https://www.python.org/downloads/source/  
+https://www.python.org/downloads/windows/  
 
 Compile How to
 ------------
