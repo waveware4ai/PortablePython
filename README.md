@@ -1,5 +1,8 @@
 # PortablePython
 
+Additionally, you can create the most convenient environment possible when using it with zimport at the link below.  
+https://github.com/waveware4ai/zimport
+
 Installation
 ------------
 1. This portable python can be unpacked and run in any path.
