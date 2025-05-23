@@ -12,8 +12,6 @@ sudo apt install openssh-server -y
 
 sudo apt-get install cifs-utils
 sudo mkdir /mnt/test
-sudo mount -t cifs  -o user=administrator,,uid=0,gid=0,file_mode=0777,dir_mode=0777 //192.168.3.14/w$/\!VM/mount /mnt/test
-
 
 sudo apt-get install build-essential gdb lcov pkg-config               \
       libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
