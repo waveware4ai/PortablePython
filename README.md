@@ -10,7 +10,7 @@ Installation
 1. This portable python can be unpacked and run in any path.
 2. Since this portable python does not include any packages, you must first install pip using the python command below.
 ```
-./python ./python.pip.py" 
+./python ./python.pip.py 
 ```
 Support
 ------------
