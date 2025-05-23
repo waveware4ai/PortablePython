@@ -1,5 +1,8 @@
 # PortablePython
 It provides Portable Python based on Windows and Linux Ubuntu22.  
+Python is generally tightly coupled with the system, which makes it difficult for users to use it as they wish (especially in the case of Linux distributions).  
+So, I thought that there was a need to create a Python distribution that could be unpacked and run regardless of the path, that would only be added inside the PortablePython directory when adding packages,  
+and that would also work on other systems just by compressing and distributing the applications that work based on PortablePython.
 
 Additionally, you can create the most convenient environment possible when using it with zimport/SandBox4Linux at the link below.  
 https://github.com/waveware4ai/zimport  
