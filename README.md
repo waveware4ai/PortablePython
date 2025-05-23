@@ -1,7 +1,7 @@
 # PortablePython
 It provides Portable Python based on Windows and Linux Ubuntu22.  
 
-Additionally, you can create the most convenient environment possible when using it with zimport/SandBoxForNVIDIA at the link below.  
+Additionally, you can create the most convenient environment possible when using it with zimport/SandBox4Linux at the link below.  
 https://github.com/waveware4ai/zimport  
 https://github.com/waveware4ai/SandBox4Linux
 
